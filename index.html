@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SimpCoder</title>
+  <title>Codiac</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -290,16 +290,14 @@
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <div class="brand">SimpCoder</div>
+      <div class="brand">Codiac</div>
       <div class="auth">
-        <span>Sign In</span>
       </div>
     </header>
 
     <main class="studio">
       <section class="editor-pane">
         <div class="editor-tabs">
-          <span class="tab active">Code</span>
         </div>
         <div class="workspace-wrap">
           <div id="blocklyDiv"></div>
@@ -384,7 +382,7 @@ function buildCProgram() {
 
   const includeSection = Array.from(includes).join('');
   const declarationSection = declarations.length ? declarations.join('') + '\n' : '';
-  const statementSection = statements.length ? indentCodeLines(statements.join('')) : '    while(1);\n';
+  const statementSection = statements.length ? indentCodeLines(statements.join('')) : '';
 
   return `${includeSection}
 ${declarationSection}void main(void) {
