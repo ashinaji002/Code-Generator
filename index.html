@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+  <script src="https://unpkg.com/blockly/blockly.min.js"></script> 
   <style>
     :root {
       --bg: #f6f3ea;
@@ -150,6 +150,72 @@
       }
     }
 
+    @media (max-width: 640px) {
+      body {
+        padding: 10px;
+      }
+
+      .app {
+        border-radius: 14px;
+      }
+
+      .header {
+        padding: 16px 14px 10px;
+      }
+
+      .title {
+        font-size: 1.2rem;
+      }
+
+      .subtitle {
+        font-size: 0.88rem;
+      }
+
+      .content {
+        gap: 12px;
+        padding: 12px;
+      }
+
+      .panel-head {
+        padding: 9px 10px;
+        font-size: 0.76rem;
+      }
+
+      #blocklyDiv {
+        height: 52vh;
+        min-height: 320px;
+        max-height: 520px;
+      }
+
+      .output-wrap {
+        min-height: 42vh;
+        height: auto;
+      }
+
+      .actions {
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
+      }
+
+      button {
+        width: 100%;
+        min-height: 44px;
+      }
+
+      #output {
+        font-size: 0.82rem;
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 640px) and (orientation: landscape) {
+      #blocklyDiv {
+        height: 70vh;
+        min-height: 260px;
+      }
+    }
+
     @keyframes rise {
       from {
         opacity: 0;
@@ -213,6 +279,8 @@
       workspace = createWorkspace();
       loadStarterBlock(workspace);
       els.generateBtn.addEventListener('click', generateCode);
+      // Keep Blockly SVG sized correctly when phone viewport changes.
+      window.addEventListener('resize', scheduleWorkspaceResize);
     }
 
     // Define the custom Blockly block shown in the toolbox.
@@ -244,6 +312,22 @@
     // Build the draggable block workspace UI.
     function createWorkspace() {
       return Blockly.inject(els.blocklyDiv, { toolbox: els.toolbox });
+    }
+
+    let resizeFrameId = null;
+
+    // Batch rapid resize/orientation events into one layout update.
+    function scheduleWorkspaceResize() {
+      if (!workspace) {
+        return;
+      }
+      if (resizeFrameId !== null) {
+        cancelAnimationFrame(resizeFrameId);
+      }
+      resizeFrameId = requestAnimationFrame(function () {
+        Blockly.svgResize(workspace);
+        resizeFrameId = null;
+      });
     }
 
     // Add one default block so the page is ready to use immediately.
