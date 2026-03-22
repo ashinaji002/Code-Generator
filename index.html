@@ -151,7 +151,14 @@
     .output-wrap {
       display: flex;
       flex-direction: column;
-      min-height: 250px;
+      min-height: 220px;
+      flex: 1;
+    }
+
+    .calc-wrap {
+      display: flex;
+      flex-direction: column;
+      min-height: 220px;
       flex: 1;
     }
 
@@ -203,6 +210,60 @@
       line-height: 1.5;
       background: #fff;
       color: #312518;
+    }
+
+    .calc-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #fffdf9;
+      flex: 1;
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #6e5a47;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .field input,
+    .field select {
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.88rem;
+      color: #3a2d21;
+      background: #fff;
+    }
+
+    .calc-result {
+      margin: 0;
+      border: 1px dashed #ccb39a;
+      background: #fff7ed;
+      border-radius: 8px;
+      padding: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.84rem;
+      line-height: 1.45;
+      color: #4a3422;
+      white-space: pre-wrap;
     }
 
     .blocklyToolboxDiv {
@@ -267,6 +328,10 @@
         font-size: 0.82rem;
         padding: 12px;
       }
+
+      .calc-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 640px) and (orientation: landscape) {
@@ -312,6 +377,31 @@
           </div>
           <pre id="output">Click "Generate C Code" to see output.</pre>
         </article>
+
+        <article class="card calc-wrap">
+          <div class="panel-head">Hexadecimal Calculator</div>
+          <div class="calc-body">
+            <div class="calc-grid">
+              <div class="field">
+                <label for="hexA">Value A</label>
+                <input id="hexA" type="text" value="0x0C" placeholder="0x0C" />
+              </div>
+              <div class="field">
+                <label for="hexB">Value B</label>
+                <input id="hexB" type="text" value="0x30" placeholder="0x30" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="hexOp">Operation</label>
+              <select id="hexOp">
+                <option value="OR">OR (|)</option>
+                <option value="AND">AND (&)</option>
+              </select>
+            </div>
+            <button id="calcBtn" class="btn-primary">Calculate</button>
+            <pre id="calcResult" class="calc-result">Result: 0x3C</pre>
+          </div>
+        </article>
       </aside>
     </main>
   </div>
@@ -332,6 +422,15 @@
 const generator = new Blockly.Generator('C');
 generator.ORDER_ATOMIC = 0;
 let workspace;
+const els = {
+  generateBtn: document.getElementById('generateBtn'),
+  output: document.getElementById('output'),
+  calcBtn: document.getElementById('calcBtn'),
+  hexA: document.getElementById('hexA'),
+  hexB: document.getElementById('hexB'),
+  hexOp: document.getElementById('hexOp'),
+  calcResult: document.getElementById('calcResult')
+};
 
 //Creates work Area
 window.onload = function() {
@@ -340,15 +439,21 @@ window.onload = function() {
   });
   window.addEventListener('resize', scheduleWorkspaceResize);
 
-  document.getElementById("generateBtn").onclick = function() {
+  els.generateBtn.onclick = function() {
     try {
       let fullCode = buildCProgram();
 
-      document.getElementById("output").textContent = fullCode;
+      els.output.textContent = fullCode;
     } catch (error) {
-      document.getElementById("output").textContent = 'Error: ' + error.message;
+      els.output.textContent = 'Error: ' + error.message;
     }
   };
+
+  els.calcBtn.onclick = runHexCalculation;
+  els.hexA.addEventListener('input', runHexCalculation);
+  els.hexB.addEventListener('input', runHexCalculation);
+  els.hexOp.addEventListener('change', runHexCalculation);
+  runHexCalculation();
 };
 
 let resizeFrameId = null;
@@ -601,6 +706,55 @@ function normalizeHexValue(value, fallback) {
     return raw;
   }
   return fallback;
+}
+
+function parseNumericInput(raw) {
+  const value = String(raw || '').trim();
+  if (!value) {
+    return null;
+  }
+  if (/^0x[0-9a-fA-F]+$/.test(value)) {
+    return parseInt(value, 16);
+  }
+  if (/^[0-9]+$/.test(value)) {
+    return parseInt(value, 10);
+  }
+  if (/^[0-9a-fA-F]+$/.test(value)) {
+    return parseInt(value, 16);
+  }
+  return null;
+}
+
+function formatHex(value) {
+  const normalized = Number(value) >>> 0;
+  return '0x' + normalized.toString(16).toUpperCase();
+}
+
+function formatBinary(value) {
+  const normalized = Number(value) >>> 0;
+  const bin = normalized.toString(2);
+  const padLength = Math.max(8, Math.ceil(bin.length / 8) * 8);
+  return bin.padStart(padLength, '0');
+}
+
+function runHexCalculation() {
+  const a = parseNumericInput(els.hexA.value);
+  const b = parseNumericInput(els.hexB.value);
+
+  if (a === null || b === null) {
+    els.calcResult.textContent = 'Enter valid values like 0x0C, 0x30, or decimal numbers.';
+    return;
+  }
+
+  const op = els.hexOp.value;
+  const result = op === 'AND' ? (a & b) : (a | b);
+  els.calcResult.textContent =
+    'A = ' + formatHex(a) + ' (' + a + ')\n' +
+    'B = ' + formatHex(b) + ' (' + b + ')\n' +
+    'Operation = ' + op + '\n' +
+    'Result (HEX) = ' + formatHex(result) + '\n' +
+    'Result (DEC) = ' + result + '\n' +
+    'Result (BIN) = ' + formatBinary(result);
 }
 
 </script>
