@@ -3,20 +3,24 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Blockly to C Generator</title>
+  <title>SimpCoder</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/blockly/blockly.min.js"></script> 
   <style>
     :root {
-      --bg: #f6f3ea;
-      --ink: #1f2933;
-      --panel: #fffdf8;
-      --accent: #cc5a2f;
-      --accent-strong: #a5421d;
-      --border: #e6dbc7;
-      --shadow: 0 12px 30px rgba(48, 44, 35, 0.12);
+      --bg: #f5efe6;
+      --ink: #2f251c;
+      --panel: #fbf6ef;
+      --topbar-a: #b88758;
+      --topbar-b: #a47245;
+      --topbar-ink: #fff8ef;
+      --line: #d9c6b3;
+      --card: #fffaf4;
+      --accent: #b5743e;
+      --accent-strong: #925629;
+      --shadow: 0 10px 24px rgba(66, 45, 27, 0.16);
     }
 
     * {
@@ -28,84 +32,136 @@
       min-height: 100vh;
       font-family: 'Space Grotesk', sans-serif;
       color: var(--ink);
-      background:
-        radial-gradient(circle at 15% 10%, #f9d8b5 0 18%, transparent 19%),
-        radial-gradient(circle at 85% 80%, #f4c59d 0 20%, transparent 21%),
-        var(--bg);
-      padding: 20px;
+      background: radial-gradient(circle at 90% 10%, #e8d3bc 0 10%, transparent 11%), var(--bg);
     }
 
-    .app {
-      max-width: 1100px;
-      margin: 0 auto;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      animation: rise 500ms ease-out;
+    .app-shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    .header {
-      padding: 22px 24px 14px;
-      border-bottom: 1px solid var(--border);
+    .topbar {
+      height: 56px;
+      background: linear-gradient(90deg, var(--topbar-a), var(--topbar-b));
+      color: var(--topbar-ink);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      box-shadow: 0 2px 0 rgba(255, 255, 255, 0.08) inset;
     }
 
-    .title {
-      margin: 0;
-      font-size: clamp(1.4rem, 2.4vw, 2rem);
-      letter-spacing: 0.02em;
-    }
-
-    .subtitle {
-      margin: 6px 0 0;
-      color: #5b6873;
-      font-size: 0.95rem;
-    }
-
-    .content {
-      display: grid;
-      grid-template-columns: 1.3fr 0.9fr;
-      gap: 16px;
-      padding: 16px;
-    }
-
-    .panel {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-    }
-
-    .panel-head {
-      padding: 10px 12px;
-      font-size: 0.85rem;
+    .brand {
       font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #4a5560;
-      border-bottom: 1px solid var(--border);
-      background: #fff9f1;
+      letter-spacing: 0.02em;
+      font-size: 1.05rem;
+    }
+
+    .menu {
+      display: flex;
+      gap: 18px;
+      font-size: 0.9rem;
+      opacity: 0.95;
+    }
+
+    .menu span,
+    .auth span {
+      white-space: nowrap;
+    }
+
+    .auth {
+      display: flex;
+      gap: 14px;
+      font-size: 0.86rem;
+      opacity: 0.95;
+    }
+
+    .studio {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 2fr 0.95fr;
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .editor-pane,
+    .right-pane {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .right-pane {
+      height: 100%;
+    }
+
+    .editor-pane {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .editor-tabs {
+      display: flex;
+      gap: 6px;
+      padding: 8px;
+      border-bottom: 1px solid var(--line);
+      background: #efe3d4;
+    }
+
+    .tab {
+      border: 1px solid #dcc6ad;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #6f533a;
+      padding: 6px 12px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .tab.active {
+      background: #f4e3cf;
+      border-color: #cfae8b;
+      color: #6f4523;
+    }
+
+    .workspace-wrap {
+      position: relative;
+      flex: 1;
+      min-height: 560px;
     }
 
     #blocklyDiv {
-      height: 440px;
+      height: 100%;
       width: 100%;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
     }
 
     .output-wrap {
       display: flex;
       flex-direction: column;
-      min-height: 440px;
+      min-height: 250px;
+      flex: 1;
     }
 
     .actions {
       padding: 12px;
-      border-bottom: 1px solid var(--border);
-      background: #fffaf4;
+      border-bottom: 1px solid var(--line);
+      background: #f6e9db;
     }
 
-    button {
+    .btn-primary {
       border: 0;
       border-radius: 10px;
       padding: 10px 14px;
@@ -117,13 +173,24 @@
       transition: transform 120ms ease, filter 120ms ease;
     }
 
-    button:hover {
+    .btn-primary:hover {
       transform: translateY(-1px);
       filter: brightness(1.05);
     }
 
-    button:active {
+    .btn-primary:active {
       transform: translateY(0);
+    }
+
+    .panel-head {
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5f4b39;
+      border-bottom: 1px solid var(--line);
+      background: #f3e7d8;
     }
 
     #output {
@@ -135,60 +202,53 @@
       font-size: 0.9rem;
       line-height: 1.5;
       background: #fff;
-      color: #243240;
+      color: #312518;
+    }
+
+    .blocklyToolboxDiv {
+      border-right: 1px solid #ddccb8 !important;
+      background: #f8efe4 !important;
     }
 
     @media (max-width: 920px) {
-      .content {
+      .studio {
         grid-template-columns: 1fr;
       }
 
-      #blocklyDiv,
-      .output-wrap {
-        min-height: 360px;
-        height: 360px;
+      .workspace-wrap {
+        min-height: 420px;
       }
     }
 
     @media (max-width: 640px) {
-      body {
-        padding: 10px;
+      .menu {
+        display: none;
       }
 
-      .app {
-        border-radius: 14px;
+      .topbar {
+        padding: 0 10px;
       }
 
-      .header {
-        padding: 16px 14px 10px;
+      .brand {
+        font-size: 0.95rem;
       }
 
-      .title {
-        font-size: 1.2rem;
+      .auth {
+        gap: 10px;
+        font-size: 0.78rem;
       }
 
-      .subtitle {
-        font-size: 0.88rem;
+      .studio {
+        padding: 8px;
+        gap: 8px;
       }
 
-      .content {
-        gap: 12px;
-        padding: 12px;
-      }
-
-      .panel-head {
-        padding: 9px 10px;
-        font-size: 0.76rem;
-      }
-
-      #blocklyDiv {
-        height: 52vh;
-        min-height: 320px;
-        max-height: 520px;
+      .workspace-wrap {
+        min-height: 340px;
       }
 
       .output-wrap {
-        min-height: 42vh;
+        min-height: 220px;
         height: auto;
       }
 
@@ -198,7 +258,7 @@
         z-index: 2;
       }
 
-      button {
+      .btn-primary {
         width: 100%;
         min-height: 44px;
       }
@@ -210,9 +270,8 @@
     }
 
     @media (max-width: 640px) and (orientation: landscape) {
-      #blocklyDiv {
-        height: 70vh;
-        min-height: 260px;
+      .workspace-wrap {
+        min-height: 280px;
       }
     }
 
@@ -229,31 +288,44 @@
   </style>
 </head>
 <body>
-  <main class="app">
-    <header class="header">
-      <h2 class="title">Block to C Code Generator</h2>
-      <p class="subtitle">Build logic with blocks and instantly convert it to C.</p>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">SimpCoder</div>
+      <div class="auth">
+        <span>Sign In</span>
+      </div>
     </header>
 
-    <section class="content">
-      <article class="panel">
-        <div class="panel-head">Blockly Workspace</div>
-        <div id="blocklyDiv"></div>
-      </article>
-
-      <article class="panel output-wrap">
-        <div class="panel-head">Generated C Code</div>
-        <div class="actions">
-          <button id="generateBtn">Generate C Code</button>
+    <main class="studio">
+      <section class="editor-pane">
+        <div class="editor-tabs">
+          <span class="tab active">Code</span>
         </div>
-        <pre id="output">Click "Generate C Code" to see output.</pre>
-      </article>
-    </section>
-  </main>
+        <div class="workspace-wrap">
+          <div id="blocklyDiv"></div>
+        </div>
+      </section>
+
+      <aside class="right-pane">
+        <article class="card output-wrap">
+          <div class="panel-head">Generated C Code</div>
+          <div class="actions">
+            <button id="generateBtn" class="btn-primary">Generate C Code</button>
+          </div>
+          <pre id="output">Click "Generate C Code" to see output.</pre>
+        </article>
+      </aside>
+    </main>
+  </div>
 
   <xml id="toolbox" style="display: none">
     <block type="start_block"></block>
     <block type="include_library"></block>
+    <block type="define_sfr"></block>
+    <block type="define_sbit"></block>
+    <block type="assign_register_hex"></block>
+    <block type="assign_bit_value"></block>
+    <block type="while_forever"></block>
     <block type="print_text"></block>
     <block type="text_input"></block>
   </xml>
@@ -263,14 +335,13 @@
 const generator = new Blockly.Generator('C');
 generator.ORDER_ATOMIC = 0;
 let workspace;
-const START_BLOCK_XML = '<xml><block type="start_block" x="20" y="20"><next><block type="include_library"><next><block type="print_text"><value name="TEXT"><block type="text_input"></block></value></block></next></block></next></block></xml>';
 
 //Creates work Area
 window.onload = function() {
   workspace = Blockly.inject('blocklyDiv', {
     toolbox: document.getElementById('toolbox')
   });
-  loadStarterBlocks();
+  window.addEventListener('resize', scheduleWorkspaceResize);
 
   document.getElementById("generateBtn").onclick = function() {
     try {
@@ -283,23 +354,87 @@ window.onload = function() {
   };
 };
 
-function loadStarterBlocks() {
-  const startXml = Blockly.utils.xml.textToDom(START_BLOCK_XML);
-  Blockly.Xml.domToWorkspace(startXml, workspace);
+let resizeFrameId = null;
+
+function scheduleWorkspaceResize() {
+  if (!workspace) {
+    return;
+  }
+  if (resizeFrameId !== null) {
+    cancelAnimationFrame(resizeFrameId);
+  }
+  resizeFrameId = requestAnimationFrame(function () {
+    Blockly.svgResize(workspace);
+    resizeFrameId = null;
+  });
 }
 
 function buildCProgram() {
-  const generatedCode = generator.workspaceToCode(workspace);
-  const includeLines = generatedCode.match(/^#include <[^>]+>\n/gm) || [];
-  const uniqueIncludes = [...new Set(includeLines)];
-  const bodyCode = generatedCode.replace(/^#include <[^>]+>\n/gm, '');
-  const includeSection = uniqueIncludes.length ? uniqueIncludes.join('') : '#include <stdio.h>\n';
+  const includes = new Set();
+  const declarations = [];
+  const statements = [];
+  const topBlocks = workspace.getTopBlocks(true);
+
+  for (let i = 0; i < topBlocks.length; i++) {
+    collectCodeFromChain(topBlocks[i], includes, declarations, statements);
+  }
+
+  if (includes.size === 0) {
+    includes.add('#include <8052.h>\n');
+  }
+
+  const includeSection = Array.from(includes).join('');
+  const declarationSection = declarations.length ? declarations.join('') + '\n' : '';
+  const statementSection = statements.length ? indentCodeLines(statements.join('')) : '    while(1);\n';
 
   return `${includeSection}
-int main() {
-${bodyCode}
-return 0;
-}`;
+${declarationSection}void main(void) {
+${statementSection}}`;
+}
+
+function collectCodeFromChain(block, includes, declarations, statements) {
+  const declarationTypes = new Set(['define_sfr', 'define_sbit']);
+  const statementTypes = new Set(['assign_register_hex', 'assign_bit_value', 'while_forever', 'print_text']);
+  let current = block;
+
+  while (current) {
+    const type = current.type;
+    if (type === 'include_library') {
+      const code = generateBlockCode(current);
+      if (code) {
+        includes.add(code);
+      }
+    } else if (declarationTypes.has(type)) {
+      const code = generateBlockCode(current);
+      if (code) {
+        declarations.push(code);
+      }
+    } else if (statementTypes.has(type)) {
+      const code = generateBlockCode(current);
+      if (code) {
+        statements.push(code);
+      }
+    }
+    current = current.getNextBlock();
+  }
+}
+
+function generateBlockCode(block) {
+  const blockGenerator = generator.forBlock[block.type];
+  if (typeof blockGenerator !== 'function') {
+    return '';
+  }
+  const result = blockGenerator(block, generator);
+  return Array.isArray(result) ? result[0] : result;
+}
+
+function indentCodeLines(code) {
+  const lines = String(code)
+    .split('\n')
+    .filter(function (line, index, arr) {
+      return !(index === arr.length - 1 && line === '');
+    });
+  return lines.map(function (line) { return line ? '    ' + line : ''; }).join('\n') + '\n';
 }
 
 // Include block
@@ -308,8 +443,8 @@ Blockly.Blocks['start_block'] = {
     this.appendDummyInput().appendField('Start');
     this.setNextStatement(true);
     this.setColour(120);
-    this.setDeletable(false);
-    this.setMovable(false);
+    this.setDeletable(true);
+    this.setMovable(true);
   }
 };
 
@@ -319,13 +454,74 @@ Blockly.Blocks['include_library'] = {
     this.appendDummyInput()
       .appendField('include')
       .appendField(new Blockly.FieldDropdown([
-        ['stdio.h', 'stdio.h'],
-        ['stdlib.h', 'stdlib.h'],
-        ['string.h', 'string.h']
+        ['8052.h', '8052.h']
       ]), 'LIB');
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setColour(250);
+  }
+};
+
+Blockly.Blocks['define_sfr'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField('__sfr __at (')
+      .appendField(new Blockly.FieldTextInput('0xB1'), 'ADDR')
+      .appendField(') ')
+      .appendField(new Blockly.FieldTextInput('P3M1'), 'NAME');
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour(220);
+  }
+};
+
+Blockly.Blocks['define_sbit'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField('__sbit __at (')
+      .appendField(new Blockly.FieldTextInput('0xCC'), 'ADDR')
+      .appendField(') ')
+      .appendField(new Blockly.FieldTextInput('P5_4'), 'NAME');
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour(200);
+  }
+};
+
+Blockly.Blocks['assign_register_hex'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField('set')
+      .appendField(new Blockly.FieldTextInput('P3M0'), 'TARGET')
+      .appendField('=')
+      .appendField(new Blockly.FieldTextInput('0x0C'), 'VALUE');
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour(40);
+  }
+};
+
+Blockly.Blocks['assign_bit_value'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField('set bit')
+      .appendField(new Blockly.FieldTextInput('P3_2'), 'TARGET')
+      .appendField('=')
+      .appendField(new Blockly.FieldDropdown([
+        ['0', '0'],
+        ['1', '1']
+      ]), 'VALUE');
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour(65);
+  }
+};
+
+Blockly.Blocks['while_forever'] = {
+  init: function () {
+    this.appendDummyInput().appendField('while(1);');
+    this.setPreviousStatement(true);
+    this.setColour(15);
   }
 };
 
@@ -358,8 +554,36 @@ generator.forBlock['start_block'] = function() {
 };
 
 generator.forBlock['include_library'] = function(block) {
-  const lib = block.getFieldValue('LIB') || 'stdio.h';
+  const lib = block.getFieldValue('LIB') || '8052.h';
   return '#include <' + lib + '>\n';
+};
+
+generator.forBlock['define_sfr'] = function(block) {
+  const addr = normalizeHexValue(block.getFieldValue('ADDR'), '0x00');
+  const name = sanitizeIdentifier(block.getFieldValue('NAME'), 'TEMP_REG');
+  return '__sfr __at (' + addr + ') ' + name + ';\n';
+};
+
+generator.forBlock['define_sbit'] = function(block) {
+  const addr = normalizeHexValue(block.getFieldValue('ADDR'), '0x00');
+  const name = sanitizeIdentifier(block.getFieldValue('NAME'), 'TEMP_BIT');
+  return '__sbit __at (' + addr + ') ' + name + ';\n';
+};
+
+generator.forBlock['assign_register_hex'] = function(block) {
+  const target = sanitizeIdentifier(block.getFieldValue('TARGET'), 'TEMP_REG');
+  const value = normalizeHexValue(block.getFieldValue('VALUE'), '0x00');
+  return target + ' = ' + value + ';\n';
+};
+
+generator.forBlock['assign_bit_value'] = function(block) {
+  const target = sanitizeIdentifier(block.getFieldValue('TARGET'), 'TEMP_BIT');
+  const value = block.getFieldValue('VALUE') === '1' ? '1' : '0';
+  return target + ' = ' + value + ';\n';
+};
+
+generator.forBlock['while_forever'] = function() {
+  return 'while(1);\n';
 };
 
 generator.forBlock['print_text'] = function(block) {
@@ -374,6 +598,28 @@ generator.forBlock['text_input'] = function(block) {
 
 function escapeForCString(text) {
   return String(text).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+function sanitizeIdentifier(name, fallback) {
+  const cleaned = String(name || '').trim().replace(/[^A-Za-z0-9_]/g, '');
+  if (!cleaned) {
+    return fallback;
+  }
+  return /^[A-Za-z_]/.test(cleaned) ? cleaned : '_' + cleaned;
+}
+
+function normalizeHexValue(value, fallback) {
+  const raw = String(value || '').trim();
+  if (/^0x[0-9a-fA-F]+$/.test(raw)) {
+    return raw;
+  }
+  if (/^[0-9a-fA-F]+$/.test(raw)) {
+    return '0x' + raw.toUpperCase();
+  }
+  if (/^[0-9]+$/.test(raw)) {
+    return raw;
+  }
+  return fallback;
 }
 
 </script>
