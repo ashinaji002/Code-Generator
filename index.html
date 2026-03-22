@@ -33,6 +33,8 @@
       font-family: 'Space Grotesk', sans-serif;
       color: var(--ink);
       background: radial-gradient(circle at 90% 10%, #e8d3bc 0 10%, transparent 11%), var(--bg);
+      -webkit-font-smoothing: antialiased;
+      -webkit-touch-callout: none;
     }
 
     .app-shell {
@@ -50,6 +52,7 @@
       justify-content: space-between;
       padding: 0 16px;
       box-shadow: 0 2px 0 rgba(255, 255, 255, 0.08) inset;
+      flex-shrink: 0;
     }
 
     .brand {
@@ -171,13 +174,20 @@
     .btn-primary {
       border: 0;
       border-radius: 10px;
-      padding: 10px 14px;
+      padding: 12px 16px;
       font-family: inherit;
       font-weight: 700;
       color: #fff;
       background: linear-gradient(135deg, var(--accent), var(--accent-strong));
       cursor: pointer;
       transition: transform 120ms ease, filter 120ms ease;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .btn-primary:hover {
@@ -243,14 +253,17 @@
 
     .field input,
     .field select {
-      height: 36px;
+      height: 44px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 0 10px;
+      padding: 0 12px;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.88rem;
+      font-size: 0.95rem;
       color: #3a2d21;
       background: #fff;
+      -webkit-appearance: none;
+      appearance: none;
+      touch-action: manipulation;
     }
 
     .calc-result {
@@ -277,7 +290,57 @@
       }
 
       .workspace-wrap {
-        min-height: 420px;
+        min-height: 400px;
+      }
+
+      .calc-button {
+        bottom: 20px;
+        right: 20px;
+        width: 64px;
+        height: 64px;
+        font-size: 28px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .topbar {
+        height: 52px;
+        padding: 0 12px;
+      }
+
+      .brand {
+        font-size: 1rem;
+      }
+
+      .studio {
+        padding: 6px;
+        gap: 6px;
+      }
+
+      .workspace-wrap {
+        min-height: 350px;
+      }
+
+      .field label {
+        font-size: 0.8rem;
+      }
+
+      #output {
+        font-size: 0.85rem;
+        padding: 12px;
+      }
+
+      .calc-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-container {
+        max-width: 90vw;
+      }
+
+      .numbadpad {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
       }
     }
 
@@ -287,6 +350,7 @@
       }
 
       .topbar {
+        height: 48px;
         padding: 0 10px;
       }
 
@@ -300,16 +364,17 @@
       }
 
       .studio {
-        padding: 8px;
-        gap: 8px;
+        padding: 6px;
+        gap: 6px;
+        grid-template-columns: 1fr;
       }
 
       .workspace-wrap {
-        min-height: 340px;
+        min-height: 300px;
       }
 
       .output-wrap {
-        min-height: 220px;
+        min-height: auto;
         height: auto;
       }
 
@@ -317,20 +382,143 @@
         position: sticky;
         bottom: 0;
         z-index: 2;
+        padding: 10px;
       }
 
       .btn-primary {
         width: 100%;
-        min-height: 44px;
+        min-height: 48px;
+        font-size: 1rem;
+        padding: 12px 16px;
       }
 
       #output {
-        font-size: 0.82rem;
-        padding: 12px;
+        font-size: 0.8rem;
+        padding: 10px;
+        line-height: 1.4;
+      }
+
+      .panel-head {
+        font-size: 0.75rem;
+        padding: 8px 10px;
       }
 
       .calc-grid {
         grid-template-columns: 1fr;
+        gap: 6px;
+      }
+
+      .calc-button {
+        bottom: 16px;
+        right: 16px;
+        width: 56px;
+        height: 56px;
+        font-size: 24px;
+      }
+
+      .modal-container {
+        width: 95vw;
+        max-width: 95vw;
+        max-height: 85vh;
+      }
+
+      .modal-header {
+        padding: 12px 14px;
+      }
+
+      .modal-title {
+        font-size: 0.85rem;
+      }
+
+      .modal-body {
+        padding: 12px 14px;
+        gap: 10px;
+      }
+
+      .field input,
+      .field select {
+        height: 48px;
+        font-size: 1rem;
+        padding: 0 12px;
+      }
+
+      .field label {
+        font-size: 0.75rem;
+      }
+
+      .numberpad {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        margin-top: 6px;
+      }
+
+      .numpad-btn {
+        min-height: 48px;
+        font-size: 1rem;
+        padding: 8px 6px;
+      }
+
+      .numpad-btn.wide {
+        grid-column: span 3;
+      }
+
+      .calc-result {
+        font-size: 0.8rem;
+        padding: 10px;
+        line-height: 1.4;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .topbar {
+        height: 48px;
+        padding: 0 8px;
+      }
+
+      .brand {
+        font-size: 0.9rem;
+      }
+
+      .studio {
+        padding: 4px;
+        gap: 4px;
+      }
+
+      .workspace-wrap {
+        min-height: 280px;
+      }
+
+      .actions {
+        padding: 8px;
+      }
+
+      .calc-button {
+        width: 52px;
+        height: 52px;
+        font-size: 22px;
+        bottom: 12px;
+        right: 12px;
+      }
+
+      .numberpad {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 3px;
+      }
+
+      .numpad-btn {
+        min-height: 44px;
+        font-size: 0.95rem;
+        padding: 6px 4px;
+      }
+
+      .field input,
+      .field select {
+        height: 44px;
+        font-size: 16px;
+      }
+
+      .modal-container {
+        max-height: 80vh;
       }
     }
 
@@ -350,6 +538,238 @@
         transform: translateY(0);
       }
     }
+
+    /* Calculator Circle Button */
+    .calc-button {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: white;
+      font-size: 32px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(147, 86, 41, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+      z-index: 999;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .calc-button:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 16px rgba(147, 86, 41, 0.5);
+    }
+
+    .calc-button:active,
+    .calc-button:focus {
+      transform: scale(0.95);
+      outline: 2px solid rgba(255, 255, 255, 0.5);
+      outline-offset: 2px;
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      animation: fadeIn 150ms ease;
+    }
+
+    .modal-overlay.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Modal Container */
+    .modal-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      width: 90%;
+      max-width: 420px;
+      max-height: 90vh;
+      z-index: 1001;
+      display: none;
+      flex-direction: column;
+      animation: slideUp 200ms ease;
+      overflow-y: auto;
+    }
+
+    .modal-container.active {
+      display: flex;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -45%);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+      background: #f6e9db;
+    }
+
+    .modal-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 0.03em;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--ink);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 8px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: background 120ms ease;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .modal-close:hover {
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .modal-close:active,
+    .modal-close:focus {
+      background: rgba(0, 0, 0, 0.12);
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    .modal-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .numberpad {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .numpad-btn {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fffaf4;
+      color: var(--ink);
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 12px 8px;
+      cursor: pointer;
+      transition: all 120ms ease;
+      user-select: none;
+      touch-action: manipulation;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-user-select: none;
+    }
+
+    .numpad-btn:hover {
+      background: #f5e9dc;
+      border-color: #cdb39a;
+    }
+
+    .numpad-btn:active,
+    .numpad-btn:focus {
+      background: #ede1d0;
+      transform: scale(0.97);
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    .numpad-btn.wide {
+      grid-column: span 2;
+    }
+
+    .numpad-btn.del {
+      background: #ffe0e0;
+      color: #c24848;
+    }
+
+    .numpad-btn.del:hover {
+      background: #ffc9c9;
+    }
+
+    .numpad-btn.clear {
+      background: #e0f0ff;
+      color: #2563b8;
+    }
+
+    .numpad-btn.clear:hover {
+      background: #c9e0ff;
+    }
+
+    @media (max-width: 920px) {
+      .calc-button {
+        bottom: 20px;
+        right: 20px;
+        width: 64px;
+        height: 64px;
+        font-size: 28px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .calc-button {
+        bottom: 16px;
+        right: 16px;
+        width: 56px;
+        height: 56px;
+        font-size: 24px;
+      }
+
+      .modal-container {
+        width: 95%;
+        max-width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -359,6 +779,9 @@
       <div class="auth">
       </div>
     </header>
+
+    <!-- Calculator Circle Button -->
+    <button id="calcCircleBtn" class="calc-button" title="Open Calculator">🧮</button>
 
     <main class="studio">
       <section class="editor-pane">
@@ -377,32 +800,62 @@
           </div>
           <pre id="output">Click "Generate C Code" to see output.</pre>
         </article>
-
-        <article class="card calc-wrap">
-          <div class="panel-head">Hexadecimal Calculator</div>
-          <div class="calc-body">
-            <div class="calc-grid">
-              <div class="field">
-                <label for="hexA">Value A</label>
-                <input id="hexA" type="text" value="0x0C" placeholder="0x0C" />
-              </div>
-              <div class="field">
-                <label for="hexB">Value B</label>
-                <input id="hexB" type="text" value="0x30" placeholder="0x30" />
-              </div>
-            </div>
-            <div class="field">
-              <label for="hexOp">Operation</label>
-              <select id="hexOp">
-                <option value="OR">OR (|)</option>
-                <option value="AND">AND (&)</option>
-              </select>
-            </div>
-            <button id="calcBtn" class="btn-primary">Calculate</button>
-            <pre id="calcResult" class="calc-result">Result: 0x3C</pre>
-          </div>
-        </article>
       </aside>
+    </main>
+  </div>
+
+  <!-- Calculator Modal -->
+  <div id="calcModal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-title">Hexadecimal Calculator</div>
+        <button id="calcModalClose" class="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="calc-grid">
+          <div class="field">
+            <label for="hexA">Value A</label>
+            <input id="hexA" type="text" value="0x0C" placeholder="0x0C" />
+          </div>
+          <div class="field">
+            <label for="hexB">Value B</label>
+            <input id="hexB" type="text" value="0x30" placeholder="0x30" />
+          </div>
+        </div>
+        
+        <!-- Shared Number Pad -->
+        <div class="numberpad">
+          <button type="button" class="numpad-btn" data-value="1">1</button>
+          <button type="button" class="numpad-btn" data-value="2">2</button>
+          <button type="button" class="numpad-btn" data-value="3">3</button>
+          <button type="button" class="numpad-btn del" data-action="backspace">DEL</button>
+          <button type="button" class="numpad-btn" data-value="4">4</button>
+          <button type="button" class="numpad-btn" data-value="5">5</button>
+          <button type="button" class="numpad-btn" data-value="6">6</button>
+          <button type="button" class="numpad-btn" data-value="7">7</button>
+          <button type="button" class="numpad-btn" data-value="8">8</button>
+          <button type="button" class="numpad-btn" data-value="9">9</button>
+          <button type="button" class="numpad-btn" data-value="0">0</button>
+          <button type="button" class="numpad-btn" data-value="A">A</button>
+          <button type="button" class="numpad-btn" data-value="B">B</button>
+          <button type="button" class="numpad-btn" data-value="C">C</button>
+          <button type="button" class="numpad-btn" data-value="D">D</button>
+          <button type="button" class="numpad-btn" data-value="E">E</button>
+          <button type="button" class="numpad-btn" data-value="F">F</button>
+          <button type="button" class="numpad-btn clear wide" data-action="clear">CLEAR</button>
+        </div>
+        
+        <div class="field">
+          <label for="hexOp">Operation</label>
+          <select id="hexOp">
+            <option value="OR">OR (|)</option>
+            <option value="AND">AND (&)</option>
+          </select>
+        </div>
+        <button id="calcBtn" class="btn-primary">Calculate</button>
+        <pre id="calcResult" class="calc-result">Result: 0x3C</pre>
+      </div>
+    </div>
     </main>
   </div>
 
@@ -432,12 +885,121 @@ const els = {
   calcResult: document.getElementById('calcResult')
 };
 
+// Modal Helper Functions
+function openCalcModal() {
+  const modal = document.getElementById('calcModal');
+  const container = modal.querySelector('.modal-container');
+  modal.classList.add('active');
+  container.classList.add('active');
+}
+
+function closeCalcModal() {
+  const modal = document.getElementById('calcModal');
+  const container = modal.querySelector('.modal-container');
+  modal.classList.remove('active');
+  container.classList.remove('active');
+}
+
+// Number Pad Handler
+let currentActiveInput = null;
+
+function setupNumberPadHandlers() {
+  const numpadButtons = document.querySelectorAll('.numpad-btn');
+  
+  // Track which input is focused
+  els.hexA.addEventListener('focus', function() {
+    currentActiveInput = this;
+  });
+  els.hexB.addEventListener('focus', function() {
+    currentActiveInput = this;
+  });
+  
+  // Set default to hexA
+  currentActiveInput = els.hexA;
+  
+  numpadButtons.forEach(function(button) {
+    button.addEventListener('click', function() {
+      const value = this.getAttribute('data-value');
+      const action = this.getAttribute('data-action');
+      
+      if (!currentActiveInput) {
+        currentActiveInput = els.hexA;
+      }
+      
+      let currentVal = currentActiveInput.value.trim();
+      
+      if (action === 'backspace') {
+        // Remove last character
+        currentActiveInput.value = currentVal.slice(0, -1);
+      } else if (action === 'clear') {
+        // Clear input
+        currentActiveInput.value = '';
+      } else if (value) {
+        // Append number/letter
+        currentActiveInput.value = currentVal + value;
+      }
+      
+      // Trigger input event to update calculation
+      currentActiveInput.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  });
+}
+
+// Mobile Optimization
+function setupMobileOptimizations() {
+  // Prevent unwanted zooming on double-tap
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', function(event) {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+      event.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, false);
+
+  // Fix for iOS Safari address bar visibility
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', vh + 'px');
+  window.addEventListener('resize', function() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', vh + 'px');
+  });
+
+  // Prevent context menu on long press for better UX
+  document.addEventListener('contextmenu', function(e) {
+    if (e.target.classList.contains('numpad-btn') || e.target.getAttribute('type') === 'button') {
+      e.preventDefault();
+    }
+  }, false);
+
+  // Smooth scrolling for modal on mobile
+  const modalContainer = document.querySelector('.modal-container');
+  if (modalContainer && navigator.maxTouchPoints > 0) {
+    modalContainer.style.webkitOverflowScrolling = 'touch';
+  }
+}
+
 //Creates work Area
 window.onload = function() {
+  // Setup mobile optimizations first
+  setupMobileOptimizations();
+
   workspace = Blockly.inject('blocklyDiv', {
     toolbox: document.getElementById('toolbox')
   });
   window.addEventListener('resize', scheduleWorkspaceResize);
+
+  // Modal button handlers
+  document.getElementById('calcCircleBtn').onclick = openCalcModal;
+  document.getElementById('calcModalClose').onclick = closeCalcModal;
+  document.getElementById('calcModal').onclick = function(event) {
+    if (event.target === this) {
+      closeCalcModal();
+    }
+  };
+
+  // Setup number pad handlers
+  setupNumberPadHandlers();
 
   els.generateBtn.onclick = function() {
     try {
