@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blockly to C Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+  <style>
+    :root {
+      --bg: #f6f3ea;
+      --ink: #1f2933;
+      --panel: #fffdf8;
+      --accent: #cc5a2f;
+      --accent-strong: #a5421d;
+      --border: #e6dbc7;
+      --shadow: 0 12px 30px rgba(48, 44, 35, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 10%, #f9d8b5 0 18%, transparent 19%),
+        radial-gradient(circle at 85% 80%, #f4c59d 0 20%, transparent 21%),
+        var(--bg);
+      padding: 20px;
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      animation: rise 500ms ease-out;
+    }
+
+    .header {
+      padding: 22px 24px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(1.4rem, 2.4vw, 2rem);
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: #5b6873;
+      font-size: 0.95rem;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1.3fr 0.9fr;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 10px 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #4a5560;
+      border-bottom: 1px solid var(--border);
+      background: #fff9f1;
+    }
+
+    #blocklyDiv {
+      height: 440px;
+      width: 100%;
+    }
+
+    .output-wrap {
+      display: flex;
+      flex-direction: column;
+      min-height: 440px;
+    }
+
+    .actions {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      background: #fffaf4;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: inherit;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      cursor: pointer;
+      transition: transform 120ms ease, filter 120ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    #output {
+      margin: 0;
+      padding: 14px;
+      flex: 1;
+      overflow: auto;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      background: #fff;
+      color: #243240;
+    }
+
+    @media (max-width: 920px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+
+      #blocklyDiv,
+      .output-wrap {
+        min-height: 360px;
+        height: 360px;
+      }
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h2 class="title">Block to C Code Generator</h2>
+      <p class="subtitle">Build logic with blocks and instantly convert it to C.</p>
+    </header>
+
+    <section class="content">
+      <article class="panel">
+        <div class="panel-head">Blockly Workspace</div>
+        <div id="blocklyDiv"></div>
+      </article>
+
+      <article class="panel output-wrap">
+        <div class="panel-head">Generated C Code</div>
+        <div class="actions">
+          <button id="generateBtn">Generate C Code</button>
+        </div>
+        <pre id="output">Click "Generate C Code" to see output.</pre>
+      </article>
+    </section>
+  </main>
+
+  <xml id="toolbox" style="display: none">
+    <block type="print_text"></block>
+  </xml>
+
+  <script>
+    // Core block configuration used across block + generator.
+    const BLOCK_TYPE = 'print_text';
+    const START_BLOCK_XML = '<xml><block type="print_text" x="30" y="30"></block></xml>';
+
+    // Cache DOM nodes once so code below stays clean.
+    const els = {
+      blocklyDiv: document.getElementById('blocklyDiv'),
+      toolbox: document.getElementById('toolbox'),
+      output: document.getElementById('output'),
+      generateBtn: document.getElementById('generateBtn')
+    };
+
+    let workspace;
+    const cGenerator = createCGenerator();
+
+    // App starts here.
+    window.addEventListener('load', initApp);
+
+    function initApp() {
+      registerBlocks();
+      workspace = createWorkspace();
+      loadStarterBlock(workspace);
+      els.generateBtn.addEventListener('click', generateCode);
+    }
+
+    // Define the custom Blockly block shown in the toolbox.
+    function registerBlocks() {
+      Blockly.Blocks[BLOCK_TYPE] = {
+        init: function () {
+          this.appendDummyInput()
+            .appendField('print')
+            .appendField(new Blockly.FieldTextInput('Hello'), 'TEXT');
+          this.setPreviousStatement(true, null);
+          this.setNextStatement(true, null);
+          this.setColour(160);
+        }
+      };
+    }
+
+    // Create a simple C generator with one rule for our print block.
+    function createCGenerator() {
+      const generator = new Blockly.Generator('C');
+
+      generator.forBlock[BLOCK_TYPE] = function (block) {
+        const message = escapeForCString(block.getFieldValue('TEXT'));
+        return 'printf("' + message + '\\n");\n';
+      };
+
+      return generator;
+    }
+
+    // Build the draggable block workspace UI.
+    function createWorkspace() {
+      return Blockly.inject(els.blocklyDiv, { toolbox: els.toolbox });
+    }
+
+    // Add one default block so the page is ready to use immediately.
+    function loadStarterBlock(targetWorkspace) {
+      const startXml = Blockly.utils.xml.textToDom(START_BLOCK_XML);
+      Blockly.Xml.domToWorkspace(startXml, targetWorkspace);
+    }
+
+    // Convert current blocks to C and print the result.
+    function generateCode() {
+      try {
+        const code = cGenerator.workspaceToCode(workspace);
+        renderOutput(buildCProgram(code));
+      } catch (error) {
+        renderOutput('Error: ' + error.message);
+      }
+    }
+
+    // Wrap generated statements in a minimal C program.
+    function buildCProgram(bodyCode) {
+      return `#include <stdio.h>
+
+int main() {
+${bodyCode}
+return 0;
+}`;
+    }
+
+    // Single place to update output text.
+    function renderOutput(text) {
+      els.output.textContent = text;
+    }
+
+    // Escape quotes so user text is valid inside a C string literal.
+    function escapeForCString(text) {
+      return String(text).replace(/"/g, '\\"');
+    }
+  </script>
+</body>
+</html>
