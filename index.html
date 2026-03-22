@@ -321,8 +321,7 @@
   <xml id="toolbox" style="display: none">
     <block type="start_block"></block>
     <block type="include_library"></block>
-    <block type="define_sfr"></block>
-    <block type="define_sbit"></block>
+    <block type="initialize_8052"></block>
     <block type="assign_register_hex"></block>
     <block type="assign_bit_value"></block>
     <block type="while_forever"></block>
@@ -393,7 +392,7 @@ ${statementSection}}`;
 }
 
 function collectCodeFromChain(block, includes, declarations, statements) {
-  const declarationTypes = new Set(['define_sfr', 'define_sbit']);
+  const declarationTypes = new Set(['initialize_8052']);
   const statementTypes = new Set(['assign_register_hex', 'assign_bit_value', 'while_forever', 'print_text']);
   let current = block;
 
@@ -462,29 +461,13 @@ Blockly.Blocks['include_library'] = {
   }
 };
 
-Blockly.Blocks['define_sfr'] = {
+Blockly.Blocks['initialize_8052'] = {
   init: function () {
     this.appendDummyInput()
-      .appendField('__sfr __at (')
-      .appendField(new Blockly.FieldTextInput('0xB1'), 'ADDR')
-      .appendField(') ')
-      .appendField(new Blockly.FieldTextInput('P3M1'), 'NAME');
+      .appendField('Initialize 8052 Ports');
     this.setPreviousStatement(true);
     this.setNextStatement(true);
-    this.setColour(220);
-  }
-};
-
-Blockly.Blocks['define_sbit'] = {
-  init: function () {
-    this.appendDummyInput()
-      .appendField('__sbit __at (')
-      .appendField(new Blockly.FieldTextInput('0xCC'), 'ADDR')
-      .appendField(') ')
-      .appendField(new Blockly.FieldTextInput('P5_4'), 'NAME');
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour(200);
+    this.setColour(210);
   }
 };
 
@@ -558,16 +541,16 @@ generator.forBlock['include_library'] = function(block) {
   return '#include <' + lib + '>\n';
 };
 
-generator.forBlock['define_sfr'] = function(block) {
-  const addr = normalizeHexValue(block.getFieldValue('ADDR'), '0x00');
-  const name = sanitizeIdentifier(block.getFieldValue('NAME'), 'TEMP_REG');
-  return '__sfr __at (' + addr + ') ' + name + ';\n';
-};
-
-generator.forBlock['define_sbit'] = function(block) {
-  const addr = normalizeHexValue(block.getFieldValue('ADDR'), '0x00');
-  const name = sanitizeIdentifier(block.getFieldValue('NAME'), 'TEMP_BIT');
-  return '__sbit __at (' + addr + ') ' + name + ';\n';
+generator.forBlock['initialize_8052'] = function() {
+  return '//define pinmode sfr of port 3\n' +
+    '__sfr __at (0xB1) P3M1;\n' +
+    '__sfr __at (0xB2) P3M0;\n' +
+    '//define pinmode sfr of port 5\n' +
+    '__sfr __at (0xCA) P5M0;\n' +
+    '__sfr __at (0xC9) P5M1;\n' +
+    '//set values of output port register\n' +
+    '__sbit __at (0xCC) P5_4;\n' +
+    '__sbit __at (0xCD) P5_5;\n';
 };
 
 generator.forBlock['assign_register_hex'] = function(block) {
