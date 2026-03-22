@@ -252,119 +252,130 @@
   </main>
 
   <xml id="toolbox" style="display: none">
+    <block type="start_block"></block>
+    <block type="include_library"></block>
     <block type="print_text"></block>
+    <block type="text_input"></block>
   </xml>
 
-  <script>
-    // Core block configuration used across block + generator.
-    const BLOCK_TYPE = 'print_text';
-    const START_BLOCK_XML = '<xml><block type="print_text" x="30" y="30"></block></xml>';
+<script>
+// 1. CREATE GENERATOR FIRST
+const generator = new Blockly.Generator('C');
+generator.ORDER_ATOMIC = 0;
+let workspace;
+const START_BLOCK_XML = '<xml><block type="start_block" x="20" y="20"><next><block type="include_library"><next><block type="print_text"><value name="TEXT"><block type="text_input"></block></value></block></next></block></next></block></xml>';
 
-    // Cache DOM nodes once so code below stays clean.
-    const els = {
-      blocklyDiv: document.getElementById('blocklyDiv'),
-      toolbox: document.getElementById('toolbox'),
-      output: document.getElementById('output'),
-      generateBtn: document.getElementById('generateBtn')
-    };
+//Creates work Area
+window.onload = function() {
+  workspace = Blockly.inject('blocklyDiv', {
+    toolbox: document.getElementById('toolbox')
+  });
+  loadStarterBlocks();
 
-    let workspace;
-    const cGenerator = createCGenerator();
+  document.getElementById("generateBtn").onclick = function() {
+    try {
+      let fullCode = buildCProgram();
 
-    // App starts here.
-    window.addEventListener('load', initApp);
-
-    function initApp() {
-      registerBlocks();
-      workspace = createWorkspace();
-      loadStarterBlock(workspace);
-      els.generateBtn.addEventListener('click', generateCode);
-      // Keep Blockly SVG sized correctly when phone viewport changes.
-      window.addEventListener('resize', scheduleWorkspaceResize);
+      document.getElementById("output").textContent = fullCode;
+    } catch (error) {
+      document.getElementById("output").textContent = 'Error: ' + error.message;
     }
+  };
+};
 
-    // Define the custom Blockly block shown in the toolbox.
-    function registerBlocks() {
-      Blockly.Blocks[BLOCK_TYPE] = {
-        init: function () {
-          this.appendDummyInput()
-            .appendField('print')
-            .appendField(new Blockly.FieldTextInput('Hello'), 'TEXT');
-          this.setPreviousStatement(true, null);
-          this.setNextStatement(true, null);
-          this.setColour(160);
-        }
-      };
-    }
+function loadStarterBlocks() {
+  const startXml = Blockly.utils.xml.textToDom(START_BLOCK_XML);
+  Blockly.Xml.domToWorkspace(startXml, workspace);
+}
 
-    // Create a simple C generator with one rule for our print block.
-    function createCGenerator() {
-      const generator = new Blockly.Generator('C');
+function buildCProgram() {
+  const generatedCode = generator.workspaceToCode(workspace);
+  const includeLines = generatedCode.match(/^#include <[^>]+>\n/gm) || [];
+  const uniqueIncludes = [...new Set(includeLines)];
+  const bodyCode = generatedCode.replace(/^#include <[^>]+>\n/gm, '');
+  const includeSection = uniqueIncludes.length ? uniqueIncludes.join('') : '#include <stdio.h>\n';
 
-      generator.forBlock[BLOCK_TYPE] = function (block) {
-        const message = escapeForCString(block.getFieldValue('TEXT'));
-        return 'printf("' + message + '\\n");\n';
-      };
-
-      return generator;
-    }
-
-    // Build the draggable block workspace UI.
-    function createWorkspace() {
-      return Blockly.inject(els.blocklyDiv, { toolbox: els.toolbox });
-    }
-
-    let resizeFrameId = null;
-
-    // Batch rapid resize/orientation events into one layout update.
-    function scheduleWorkspaceResize() {
-      if (!workspace) {
-        return;
-      }
-      if (resizeFrameId !== null) {
-        cancelAnimationFrame(resizeFrameId);
-      }
-      resizeFrameId = requestAnimationFrame(function () {
-        Blockly.svgResize(workspace);
-        resizeFrameId = null;
-      });
-    }
-
-    // Add one default block so the page is ready to use immediately.
-    function loadStarterBlock(targetWorkspace) {
-      const startXml = Blockly.utils.xml.textToDom(START_BLOCK_XML);
-      Blockly.Xml.domToWorkspace(startXml, targetWorkspace);
-    }
-
-    // Convert current blocks to C and print the result.
-    function generateCode() {
-      try {
-        const code = cGenerator.workspaceToCode(workspace);
-        renderOutput(buildCProgram(code));
-      } catch (error) {
-        renderOutput('Error: ' + error.message);
-      }
-    }
-
-    // Wrap generated statements in a minimal C program.
-    function buildCProgram(bodyCode) {
-      return `#include <stdio.h>
-
+  return `${includeSection}
 int main() {
 ${bodyCode}
 return 0;
 }`;
-    }
+}
 
-    // Single place to update output text.
-    function renderOutput(text) {
-      els.output.textContent = text;
-    }
+// Include block
+Blockly.Blocks['start_block'] = {
+  init: function () {
+    this.appendDummyInput().appendField('Start');
+    this.setNextStatement(true);
+    this.setColour(120);
+    this.setDeletable(false);
+    this.setMovable(false);
+  }
+};
 
-    // Escape quotes so user text is valid inside a C string literal.
-    function escapeForCString(text) {
-      return String(text).replace(/"/g, '\\"');
-    }
-  </script>
+// Include block
+Blockly.Blocks['include_library'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField('include')
+      .appendField(new Blockly.FieldDropdown([
+        ['stdio.h', 'stdio.h'],
+        ['stdlib.h', 'stdlib.h'],
+        ['string.h', 'string.h']
+      ]), 'LIB');
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour(250);
+  }
+};
+
+// Print block
+Blockly.Blocks['print_text'] = {
+  init: function () {
+    this.appendValueInput("TEXT")
+      .setCheck("String")
+      .appendField("print");
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour(160);
+  }
+};
+
+// Text input block
+Blockly.Blocks['text_input'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField('text')
+      .appendField(new Blockly.FieldTextInput('Hello World'), 'TEXT');
+    this.setOutput(true, "String");
+    this.setColour(20);
+  }
+};
+
+// GENERATOR LOGIC
+generator.forBlock['start_block'] = function() {
+  return '';
+};
+
+generator.forBlock['include_library'] = function(block) {
+  const lib = block.getFieldValue('LIB') || 'stdio.h';
+  return '#include <' + lib + '>\n';
+};
+
+generator.forBlock['print_text'] = function(block) {
+  let value = generator.valueToCode(block, 'TEXT', generator.ORDER_ATOMIC) || '"Hello"';
+  return 'printf("%s\\n", ' + value + ');\n';
+};
+
+generator.forBlock['text_input'] = function(block) {
+  const text = escapeForCString(block.getFieldValue('TEXT'));
+  return ['"' + text + '"', generator.ORDER_ATOMIC];
+};
+
+function escapeForCString(text) {
+  return String(text).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+</script>
 </body>
 </html>
